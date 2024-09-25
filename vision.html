@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visioncraft Image Generator</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        body {
+            background-color: #121212;
+            color: #ffffff;
+        }
+        .container {
+            margin-top: 50px;
+        }
+        .form-label {
+            color: #ffffff;
+        }
+        .form-control, .form-select {
+            background-color: #2c2c2c;
+            color: #ffffff;
+            border: 1px solid #444;
+        }
+        #spinner, #overlay {
+            display: none;
+        }
+        #overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+        }
+        #overlayContent {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #2c2c2c;
+            padding: 20px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="../index.html">
+                <i class="bi bi-arrow-left"></i> Back to Home
+            </a>
+        </div>
+    </nav>
+    <div class="container">
+        <h1 class="text-center" id="pageTitle">Visioncraft Image Generator</h1>
+        <form id="imageForm" class="mt-4">
+            <div class="mb-3">
+                <label for="prompt" class="form-label">Prompt</label>
+                <textarea id="prompt" name="prompt" class="form-control" rows="3" placeholder="Enter your prompt here..." required></textarea>
+            </div>
+            <div class="mb-3">
+                <label for="negative_prompt" class="form-label">Negative Prompt</label>
+                <textarea id="negative_prompt" name="negative_prompt" class="form-control" rows="2">blurry, fuzzy, low quality, low resolution, pixelated, jpeg artifacts, grainy, noisy, out of focus, unfocused, poorly drawn, bad anatomy, deformed, mutated, malformed, cropped, cut off, frame, border, watermark, signature, text, duplicate, extra limbs, missing limbs, disfigured, ugly, disgusting, gross, asymmetrical eyes, weird eyes, strange eyes, misshapen mouth, bad teeth, crooked teeth, disproportionate body, unrealistic proportions, elongated limbs, short limbs, fat, obese, skinny, emaciated, distracting background, bad composition</textarea>
+            </div>
+            <div class="mb-3">
+                <label for="model" class="form-label">Model</label>
+                <select id="model" name="model" class="form-select" required></select>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">LORAs</label>
+                <div id="loraContainer"></div>
+                <button type="button" id="addLoraBtn" class="btn btn-secondary mt-2">Add LORA</button>
+            </div>
+            <div class="row row-cols-3">
+                <div class="col-md-4 mb-3">
+                    <label for="steps" class="form-label">Steps</label>
+                    <input type="number" id="steps" name="steps" class="form-control" value="20" min="1" max="35" size="3">
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="cfg_scale" class="form-label">CFG Scale</label>
+                    <input type="number" id="cfg_scale" name="cfg_scale" class="form-control" value="7" min="1" max="30" step="0.5" size="4">
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="seed" class="form-label">Seed</label>
+                    <input type="number" id="seed" name="seed" class="form-control" value="-1">
+                </div>
+            </div>
+            <div class="row row-cols-2">
+                <div class="col-md-6 mb-3">
+                    <label for="width" class="form-label">Width</label>
+                    <input type="number" id="width" name="width" class="form-control" value="1536" min="64" max="1536" step="64">
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="height" class="form-label">Height</label>
+                    <input type="number" id="height" name="height" class="form-control" value="1536" min="64" max="1536" step="64">
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary w-100"><i class="bi-rocket-takeoff"></i>&nbsp;Generate Image</button>
+        </form>
+        <div class="text-center mt-4">
+            <div id="spinner" class="spinner-border" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <img id="generatedImage" class="img-fluid mt-4" alt="Generated Image" style="max-height: 500px;">
+        </div>
+    </div>
+
+    <div id="overlay">
+        <div id="overlayContent">
+            <h3 id="statusMessage"></h3>
+            <p id="progressMessage"></p>
+            <button id="cancelButton" class="btn btn-danger">Cancel</button>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Shared Visioncraft JS -->
+    <script src="vision.js"></script>
+    <!-- Page-specific initialization -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const category = urlParams.get('category') || 'FLUX.1';
+            document.getElementById('pageTitle').textContent = `Visioncraft ${category} Image Generator`;
+            initVisioncraft(category);
+        });
+    </script>
+</body>
+</html>
